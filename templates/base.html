@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}Skill Swap{% endblock %}
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('css', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="navbar">
+
+    <a href="{{ url_for('index') }}"
+       class="brand">
+
+        <img src="{{ url_for('css', filename='logo.png') }}"
+             alt="Skill Swap Logo">
+
+        <span>Skill Swap</span>
+
+    </a>
+
+
+    <nav>
+
+        <a href="{{ url_for('index') }}">
+            Home
+        </a>
+
+
+        {% if session.get('user_id') %}
+
+        <a href="{{ url_for('home') }}">
+            Explore
+        </a>
+
+        <a href="{{ url_for('meetings') }}">
+            Meetings
+        </a>
+
+        <a href="{{ url_for('upload') }}">
+            Upload Video
+        </a>
+
+
+        {% if session.get('role') == 'admin' %}
+
+        <a href="{{ url_for('admin') }}"
+           class="admin-link">
+
+            Admin Panel
+
+        </a>
+
+        {% endif %}
+
+
+        <a href="{{ url_for('profile',
+                             user_id=session.get('user_id')) }}"
+           class="profile-nav">
+
+            👤 Profile
+
+        </a>
+
+
+        <a href="{{ url_for('logout') }}"
+           class="logout">
+
+            Logout
+
+        </a>
+
+
+        {% else %}
+
+        <a href="{{ url_for('login') }}">
+            Login
+        </a>
+
+        <a href="{{ url_for('register') }}"
+           class="join-button">
+
+            Join Now
+
+        </a>
+
+        {% endif %}
+
+    </nav>
+
+</header>
+
+
+<!-- ================= FLASH ================= -->
+
+<main class="container">
+
+    {% with messages =
+        get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+            <div class="flash {{ category }}">
+
+                {{ message }}
+
+            </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    {% block content %}
+
+    {% endblock %}
+
+</main>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="footer-logo">
+
+        <img src="{{ url_for('css',
+                             filename='logo.png') }}">
+
+        <strong>
+            Skill Swap
+        </strong>
+
+    </div>
+
+
+    <p>
+        Learn • Share • Connect
+    </p>
+
+
+    <p class="copyright">
+        © 2026 Skill Swap. All rights reserved.
+    </p>
+
+</footer>
+
+
+<script src="{{ url_for('javascript',
+                         filename='script.js') }}">
+</script>
+
+</body>
+
+</html>

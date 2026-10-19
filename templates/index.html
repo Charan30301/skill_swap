@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}
+Skill Swap
+{% endblock %}
+
+
+{% block content %}
+
+<section class="hero">
+
+<div>
+
+<span class="tag">
+LEARN • TEACH • CONNECT
+</span>
+
+<h1>
+Swap skills.<br>
+<span>Build connections.</span>
+</h1>
+
+<p>
+Skill Swap is a community where people can
+teach what they know and learn something new
+from others.
+</p>
+
+
+<div class="hero-buttons">
+
+<a class="button"
+   href="{{ url_for('register') }}">
+
+Start Skill Swapping
+
+</a>
+
+
+<a class="button secondary"
+   href="{{ url_for('login') }}">
+
+Login
+
+</a>
+
+</div>
+
+</div>
+
+
+<div class="feature-box">
+
+<div>
+🎥
+<strong>Skill Videos</strong>
+<small>Teach through videos</small>
+</div>
+
+
+<div>
+💬
+<strong>Chat</strong>
+<small>Talk with other learners</small>
+</div>
+
+
+<div>
+📹
+<strong>Live Meetings</strong>
+<small>Connect using Zoom</small>
+</div>
+
+</div>
+
+</section>
+
+
+<h2>
+Latest Skill Videos
+</h2>
+
+
+<div class="video-grid">
+
+{% for video in videos %}
+
+<div class="video-card">
+
+<video controls>
+
+<source
+src="{{ url_for('uploaded_video',
+filename=video['filename']) }}">
+
+</video>
+
+
+<div class="video-content">
+
+<span class="tag small">
+{{ video['skill'] or 'General' }}
+</span>
+
+
+<h3>
+{{ video['title'] }}
+</h3>
+
+
+<p>
+{{ video['description'] }}
+</p>
+
+
+<p>
+By {{ video['name'] }}
+</p>
+
+
+<a href="{{ url_for('video',
+video_id=video['id']) }}">
+
+View Comments →
+
+</a>
+
+</div>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+
+No videos have been uploaded yet.
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

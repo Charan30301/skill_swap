@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}
+Chat
+{% endblock %}
+
+
+{% block content %}
+
+<div class="chat">
+
+<div class="chat-header">
+
+<div class="avatar">
+
+{{ other['name'][0]|upper }}
+
+</div>
+
+
+<div>
+
+<h2>
+{{ other['name'] }}
+</h2>
+
+<small>
+{{ other['skills'] }}
+</small>
+
+</div>
+
+</div>
+
+
+<div
+class="messages"
+id="messages">
+
+
+{% for message in messages %}
+
+<div
+class="message
+{% if message['sender_id']
+== current_user['user_id'] %}
+mine
+{% endif %}">
+
+<small>
+{{ message['name'] }}
+</small>
+
+<div>
+{{ message['message'] }}
+</div>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+Start the conversation.
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<form
+method="POST"
+class="message-form">
+
+<input
+name="message"
+placeholder="Type a message..."
+required
+autocomplete="off">
+
+
+<button class="button">
+Send
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

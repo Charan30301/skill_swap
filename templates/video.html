@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ video['title'] }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="video-detail">
+
+<video
+class="main-video"
+controls>
+
+<source
+src="{{ url_for('uploaded_video',
+filename=video['filename']) }}">
+
+</video>
+
+
+<span class="tag">
+
+{{ video['skill'] or
+'General' }}
+
+</span>
+
+
+<h1>
+{{ video['title'] }}
+</h1>
+
+
+<p>
+{{ video['description'] }}
+</p>
+
+
+<p>
+
+Shared by
+
+<a href="{{ url_for('profile',
+user_id=video['owner_id']) }}">
+
+{{ video['name'] }}
+
+</a>
+
+</p>
+
+
+<a
+class="button"
+href="{{ url_for('chat',
+user_id=video['owner_id']) }}">
+
+💬 Chat with Creator
+
+</a>
+
+
+<h2>
+Comments
+</h2>
+
+
+<form
+method="POST"
+class="comment-form">
+
+<textarea
+name="comment"
+placeholder="Write a comment..."
+required>
+</textarea>
+
+
+<button class="button">
+
+Post Comment
+
+</button>
+
+</form>
+
+
+{% for comment in comments %}
+
+<div class="comment">
+
+<strong>
+{{ comment['name'] }}
+</strong>
+
+<small>
+{{ comment['created_at'] }}
+</small>
+
+<p>
+{{ comment['comment'] }}
+</p>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+
+No comments yet.
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

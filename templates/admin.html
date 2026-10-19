@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}
+Admin Panel
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+<div>
+
+<span class="tag">
+ADMIN PANEL
+</span>
+
+<h1>
+Skill Swap Control Center
+</h1>
+
+<p>
+Monitor the Skill Swap community.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="stats">
+
+<div class="stat">
+
+<strong>
+{{ stats.users }}
+</strong>
+
+<span>
+Users
+</span>
+
+</div>
+
+
+<div class="stat">
+
+<strong>
+{{ stats.videos }}
+</strong>
+
+<span>
+Videos
+</span>
+
+</div>
+
+
+<div class="stat">
+
+<strong>
+{{ stats.comments }}
+</strong>
+
+<span>
+Comments
+</span>
+
+</div>
+
+
+<div class="stat">
+
+<strong>
+{{ stats.messages }}
+</strong>
+
+<span>
+Messages
+</span>
+
+</div>
+
+</div>
+
+
+<!-- USERS -->
+
+<section class="admin-section">
+
+<h2>
+👥 Users
+</h2>
+
+
+<table>
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Email</th>
+
+<th>Role</th>
+
+<th>Skills</th>
+
+<th>Action</th>
+
+</tr>
+
+
+{% for user in users %}
+
+<tr>
+
+<td>
+{{ user['id'] }}
+</td>
+
+
+<td>
+
+<a href="{{ url_for('profile',
+user_id=user['id']) }}">
+
+{{ user['name'] }}
+
+</a>
+
+</td>
+
+
+<td>
+{{ user['email'] }}
+</td>
+
+
+<td>
+{{ user['role'] }}
+</td>
+
+
+<td>
+{{ user['skills'] }}
+</td>
+
+
+<td>
+
+{% if user['role'] != 'admin' %}
+
+<form
+method="POST"
+action="{{ url_for('admin_delete_user',
+user_id=user['id']) }}">
+
+<button
+class="danger small-button
+delete-confirm">
+
+Delete
+
+</button>
+
+</form>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</section>
+
+
+<!-- VIDEOS -->
+
+<section class="admin-section">
+
+<h2>
+🎥 Videos
+</h2>
+
+
+<table>
+
+<tr>
+
+<th>Title</th>
+
+<th>Creator</th>
+
+<th>Skill</th>
+
+<th>Action</th>
+
+</tr>
+
+
+{% for video in videos %}
+
+<tr>
+
+<td>
+
+<a href="{{ url_for('video',
+video_id=video['id']) }}">
+
+{{ video['title'] }}
+
+</a>
+
+</td>
+
+
+<td>
+{{ video['name'] }}
+</td>
+
+
+<td>
+{{ video['skill'] }}
+</td>
+
+
+<td>
+
+<form
+method="POST"
+action="{{ url_for('admin_delete_video',
+video_id=video['id']) }}">
+
+<button
+class="danger small-button
+delete-confirm">
+
+Delete
+
+</button>
+
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</section>
+
+
+<!-- COMMENTS -->
+
+<section class="admin-section">
+
+<h2>
+💬 Comments
+</h2>
+
+
+<table>
+
+<tr>
+
+<th>User</th>
+
+<th>Video</th>
+
+<th>Comment</th>
+
+<th>Action</th>
+
+</tr>
+
+
+{% for comment in comments %}
+
+<tr>
+
+<td>
+{{ comment['user_name'] }}
+</td>
+
+
+<td>
+{{ comment['title'] }}
+</td>
+
+
+<td>
+{{ comment['comment'] }}
+</td>
+
+
+<td>
+
+<form
+method="POST"
+action="{{ url_for(
+'admin_delete_comment',
+comment_id=comment['id']
+) }}">
+
+<button
+class="danger small-button
+delete-confirm">
+
+Delete
+
+</button>
+
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</section>
+
+{% endblock %}

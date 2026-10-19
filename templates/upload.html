@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+Upload Skill
+{% endblock %}
+
+
+{% block content %}
+
+<div class="form-card wide">
+
+<h1>
+🎥 Share Your Skill
+</h1>
+
+<p>
+Upload a tutorial or demonstration
+and help another person learn.
+</p>
+
+
+<form
+method="POST"
+enctype="multipart/form-data">
+
+
+<label>
+Video Title
+</label>
+
+<input
+name="title"
+required
+placeholder="Learn Python Basics">
+
+
+<label>
+Skill
+</label>
+
+<input
+name="skill"
+placeholder="Python">
+
+
+<label>
+Description
+</label>
+
+<textarea
+name="description"
+placeholder="Explain what people will learn">
+</textarea>
+
+
+<label>
+Video
+</label>
+
+<input
+type="file"
+name="video"
+accept="video/*"
+required>
+
+
+<button
+class="button"
+type="submit">
+
+Upload Video
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

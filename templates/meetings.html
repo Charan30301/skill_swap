@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}
+Meetings
+{% endblock %}
+
+
+{% block content %}
+
+<h1>
+📹 Skill Swap Meetings
+</h1>
+
+<p>
+Create a Zoom meeting and invite another
+Skill Swap member.
+</p>
+
+
+<div class="form-card">
+
+<h2>
+Create Meeting
+</h2>
+
+
+<form method="POST">
+
+<label>
+Meeting Name
+</label>
+
+<input
+name="title"
+required
+placeholder="Python Learning Session">
+
+
+<label>
+Zoom Meeting URL
+</label>
+
+<input
+type="url"
+name="meeting_url"
+required
+placeholder="https://zoom.us/j/...">
+
+
+<label>
+Date and Time
+</label>
+
+<input
+type="datetime-local"
+name="scheduled_at"
+required>
+
+
+<label>
+Invite User
+</label>
+
+<select name="guest_id">
+
+<option value="">
+Anyone with the link
+</option>
+
+
+{% for user in users %}
+
+<option value="{{ user['id'] }}">
+
+{{ user['name'] }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+
+<button class="button">
+
+Create Meeting
+
+</button>
+
+</form>
+
+</div>
+
+
+<h2>
+Your Meetings
+</h2>
+
+
+{% for meeting in meetings %}
+
+<div class="meeting">
+
+<div>
+
+<h3>
+{{ meeting['title'] }}
+</h3>
+
+<p>
+{{ meeting['scheduled_at'] }}
+</p>
+
+<p>
+Host:
+{{ meeting['host_name'] }}
+</p>
+
+{% if meeting['guest_name'] %}
+
+<p>
+Guest:
+{{ meeting['guest_name'] }}
+</p>
+
+{% endif %}
+
+</div>
+
+
+<a
+class="button"
+target="_blank"
+href="{{ meeting['meeting_url'] }}">
+
+Join Meeting ↗
+
+</a>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+
+No meetings scheduled.
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+
+{% block content %}
+
+<div class="form-card">
+
+<h1>
+Welcome Back
+</h1>
+
+
+<form method="POST">
+
+<label>
+Email
+</label>
+
+<input
+type="email"
+name="email"
+required>
+
+
+<label>
+Password
+</label>
+
+<input
+type="password"
+name="password"
+required>
+
+
+<button
+class="button"
+type="submit">
+
+Login
+
+</button>
+
+</form>
+
+
+<hr>
+
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ user['name'] }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="profile-card">
+
+<div class="avatar large">
+
+{{ user['name'][0]|upper }}
+
+</div>
+
+
+<h1>
+{{ user['name'] }}
+</h1>
+
+
+<p>
+{{ user['bio'] or
+'Skill Swap member' }}
+</p>
+
+
+<div class="skills">
+
+{{ user['skills'] or
+'No skills listed' }}
+
+</div>
+
+
+{% if current_user.get('user_id')
+!= user['id'] %}
+
+<a
+class="button"
+href="{{ url_for('chat',
+user_id=user['id']) }}">
+
+💬 Chat
+
+</a>
+
+{% endif %}
+
+</div>
+
+
+<h2>
+Shared Videos
+</h2>
+
+
+<div class="video-grid">
+
+{% for video in videos %}
+
+<div class="video-card">
+
+<video controls>
+
+<source
+src="{{ url_for('uploaded_video',
+filename=video['filename']) }}">
+
+</video>
+
+
+<div class="video-content">
+
+<h3>
+{{ video['title'] }}
+</h3>
+
+
+<a href="{{ url_for('video',
+video_id=video['id']) }}">
+
+Open Video →
+
+</a>
+
+</div>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+No videos shared yet.
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

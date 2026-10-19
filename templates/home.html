@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}
+Explore Skills
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+<div>
+
+<span class="tag">
+COMMUNITY
+</span>
+
+<h1>
+Explore Skills
+</h1>
+
+</div>
+
+
+<a class="button"
+href="{{ url_for('upload') }}">
+
++ Share Skill
+
+</a>
+
+</div>
+
+
+<form
+class="search"
+method="GET">
+
+<input
+type="text"
+name="q"
+value="{{ q }}"
+placeholder="Search skills or videos...">
+
+<button class="button">
+Search
+</button>
+
+</form>
+
+
+<h2>
+People
+</h2>
+
+
+<div class="people-grid">
+
+{% for user in users %}
+
+<div class="person-card">
+
+<div class="avatar">
+
+{{ user['name'][0]|upper }}
+
+</div>
+
+
+<h3>
+{{ user['name'] }}
+</h3>
+
+
+<p>
+{{ user['bio'] or
+'Skill Swap member' }}
+</p>
+
+
+<p>
+<strong>
+Skills:
+</strong>
+
+{{ user['skills'] or
+'Not specified' }}
+
+</p>
+
+
+<a class="button small-button"
+href="{{ url_for('chat',
+user_id=user['id']) }}">
+
+💬 Chat
+
+</a>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<h2>
+Skill Videos
+</h2>
+
+
+<div class="video-grid">
+
+{% for video in videos %}
+
+<div class="video-card">
+
+<video controls>
+
+<source
+src="{{ url_for('uploaded_video',
+filename=video['filename']) }}">
+
+</video>
+
+
+<div class="video-content">
+
+<span class="tag small">
+
+{{ video['skill'] or
+'General' }}
+
+</span>
+
+
+<h3>
+{{ video['title'] }}
+</h3>
+
+
+<p>
+{{ video['description'] }}
+</p>
+
+
+<p>
+By {{ video['name'] }}
+</p>
+
+
+<a href="{{ url_for('video',
+video_id=video['id']) }}">
+
+Comments & Details →
+
+</a>
+
+</div>
+
+</div>
+
+{% else %}
+
+<div class="empty">
+
+No videos found.
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
