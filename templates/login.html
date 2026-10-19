@@ -1,56 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}
-Login
-{% endblock %}
-
+{% block title %}Login{% endblock %}
 
 {% block content %}
-
 <div class="form-card">
+    <h1>Welcome Back</h1>
 
-<h1>
-Welcome Back
-</h1>
+    <a class="button" href="{{ url_for('google_login') }}">
+        Continue with Google
+    </a>
 
+    <hr>
 
-<form method="POST">
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" required>
 
-<label>
-Email
-</label>
+        <label>Password</label>
+        <input type="password" name="password" required>
 
-<input
-type="email"
-name="email"
-required>
+        <button class="button" type="submit">Login</button>
+    </form>
 
-
-<label>
-Password
-</label>
-
-<input
-type="password"
-name="password"
-required>
-
-
-<button
-class="button"
-type="submit">
-
-Login
-
-</button>
-
-</form>
-
-
-<hr>
-
-
-
+    <p>
+        Don't have an account?
+        <a href="{{ url_for('register') }}">Join Now</a>
+    </p>
 </div>
-
 {% endblock %}

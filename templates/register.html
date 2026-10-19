@@ -1,91 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}
-Register
-{% endblock %}
-
+{% block title %}Register{% endblock %}
 
 {% block content %}
-
 <div class="form-card">
+    <h1>Create Account</h1>
 
-<h1>
-Create Account
-</h1>
+    <a class="button" href="{{ url_for('google_login') }}">
+        Sign up with Google
+    </a>
 
-<form method="POST">
+    <hr>
 
-<label>
-Name
-</label>
+    <form method="POST">
+        <label>Name</label>
+        <input type="text" name="name" required>
 
-<input
-type="text"
-name="name"
-required>
+        <label>Email</label>
+        <input type="email" name="email" required>
 
+        <label>Password</label>
+        <input type="password" name="password" minlength="6" required>
 
-<label>
-Email
-</label>
+        <label>Skills</label>
+        <input
+            type="text"
+            name="skills"
+            placeholder="Python, Guitar, Cooking..."
+        >
 
-<input
-type="email"
-name="email"
-required>
+        <label>About You</label>
+        <textarea name="bio" placeholder="Tell people about yourself"></textarea>
 
+        <button class="button" type="submit">
+            Create Account
+        </button>
+    </form>
 
-<label>
-Password
-</label>
-
-<input
-type="password"
-name="password"
-required>
-
-
-<label>
-Skills
-</label>
-
-<input
-type="text"
-name="skills"
-placeholder="Python, Guitar, Cooking...">
-
-
-<label>
-About You
-</label>
-
-<textarea
-name="bio"
-placeholder="Tell people about yourself">
-</textarea>
-
-
-<button
-class="button"
-type="submit">
-
-Create Account
-
-</button>
-
-</form>
-
-
-<p>
-
-Already have an account?
-
-<a href="{{ url_for('login') }}">
-Login
-</a>
-
-</p>
-
+    <p>
+        Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+    </p>
 </div>
-
 {% endblock %}

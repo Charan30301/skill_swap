@@ -1,3 +1,11 @@
+import os
+import sqlite3
+import psycopg
+
+from psycopg.rows import dict_row
+
+
+
 from flask import (
     Flask,
     render_template,
@@ -27,6 +35,8 @@ import uuid
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+
 DATABASE = os.path.join(
     BASE_DIR,
     "skill_swap.db"
@@ -41,9 +51,24 @@ UPLOAD_FOLDER = os.path.join(
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+import os
+from datetime import timedelta
+
 app = Flask(__name__)
 
-app.secret_key = "change-this-secret-key"
+app.secret_key = os.environ.get(
+    "FLASK_SECRET_KEY",
+    "dev-only-change-this-secret-key"
+)
+
+app.config.update(
+    SESSION_PERMANENT=True,
+    PERMANENT_SESSION_LIFETIME=timedelta(days=30),
+    SESSION_REFRESH_EACH_REQUEST=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1"
+)
 
 app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024
 
@@ -60,12 +85,15 @@ ALLOWED_VIDEO_EXTENSIONS = {
 # ============================================================
 
 def get_db():
+    if DATABASE_URL:
+        return psycopg.connect(
+            DATABASE_URL,
+            row_factory=dict_row,
+            connect_timeout=10
+        )
 
     db = sqlite3.connect(DATABASE)
-
     db.row_factory = sqlite3.Row
-
-    # Enable foreign keys
     db.execute("PRAGMA foreign_keys = ON")
 
     return db
@@ -530,6 +558,7 @@ def login():
         ):
 
             session.clear()
+            session.permanent = True
 
             session["user_id"] = user["id"]
 
@@ -552,7 +581,7 @@ def login():
 
 
             return redirect(
-                url_for("home")
+                url_for("index")
             )
 
 
