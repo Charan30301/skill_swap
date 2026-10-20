@@ -4,7 +4,8 @@ import psycopg
 
 from psycopg.rows import dict_row
 
-
+from dotenv import load_dotenv
+load_dotenv()
 
 from flask import (
     Flask,
@@ -68,6 +69,22 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1"
+)
+
+from authlib.integrations.flask_client import OAuth
+
+oauth = OAuth(app)
+
+oauth.register(
+    name="google",
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url=(
+        "https://accounts.google.com/.well-known/openid-configuration"
+    ),
+    client_kwargs={
+        "scope": "openid email profile"
+    },
 )
 
 app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024
@@ -594,6 +611,103 @@ def login():
     return render_template(
         "login.html"
     )
+
+
+
+# ============================================================
+# GOOGLE LOGIN
+# ============================================================
+
+@app.route("/auth/google")
+def google_login():
+    if not os.environ.get("GOOGLE_CLIENT_ID") or not os.environ.get(
+        "GOOGLE_CLIENT_SECRET"
+    ):
+        return "Google OAuth credentials are missing from .env", 500
+
+    redirect_uri = url_for(
+        "google_callback",
+        _external=True
+    )
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@app.route("/auth/google/callback")
+def google_callback():
+    try:
+        token = oauth.google.authorize_access_token()
+        google_user = token.get("userinfo")
+
+        if not google_user:
+            return "Google did not return user information.", 400
+
+        email = (google_user.get("email") or "").strip().lower()
+        name = (google_user.get("name") or "").strip()
+
+        if (
+            not email
+            or google_user.get("email_verified") is not True
+        ):
+            return "A verified Google email address is required.", 403
+
+        if not name:
+            name = email.split("@")[0]
+
+        db = get_db()
+
+        try:
+            user = db.execute(
+                "SELECT * FROM users WHERE email = ?",
+                (email,)
+            ).fetchone()
+
+            if user is None:
+                result = db.execute(
+                    """
+                    INSERT INTO users
+                        (name, email, password, role, bio, skills)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        name,
+                        email,
+                        generate_password_hash(uuid.uuid4().hex),
+                        "user",
+                        "",
+                        ""
+                    )
+                )
+
+                db.commit()
+
+                user = db.execute(
+                    "SELECT * FROM users WHERE email = ?",
+                    (email,)
+                ).fetchone()
+
+            session.clear()
+            session.permanent = True
+            session["user_id"] = user["id"]
+            session["name"] = user["name"]
+            session["role"] = user["role"]
+
+        finally:
+            db.close()
+
+        if user["role"] == "admin":
+            return redirect(url_for("admin"))
+
+        return redirect(url_for("index"))
+
+    except Exception:
+        app.logger.exception("Google sign-in failed")
+        return (
+            "Google sign-in failed. Check the server terminal "
+            "for details and verify your OAuth configuration.",
+            500
+        )
+
+
 
 
 # ============================================================
