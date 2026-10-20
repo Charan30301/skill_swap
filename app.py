@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import psycopg
-
+from flask_wtf.csrf import CSRFProtect
 from psycopg.rows import dict_row
 
 from dotenv import load_dotenv
@@ -57,10 +57,11 @@ from datetime import timedelta
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get(
-    "FLASK_SECRET_KEY",
-    "dev-only-change-this-secret-key"
-)
+secret_key = os.environ.get("FLASK_SECRET_KEY")
+if not secret_key:
+    raise RuntimeError("Set FLASK_SECRET_KEY before starting the app.")
+
+app.config["SECRET_KEY"] = secret_key
 
 app.config.update(
     SESSION_PERMANENT=True,
@@ -68,8 +69,10 @@ app.config.update(
     SESSION_REFRESH_EACH_REQUEST=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1"
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
 )
+
+csrf = CSRFProtect(app)
 
 from authlib.integrations.flask_client import OAuth
 
@@ -714,19 +717,11 @@ def google_callback():
 # LOGOUT
 # ============================================================
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
-
     session.clear()
-
-    flash(
-        "You have been logged out.",
-        "success"
-    )
-
-    return redirect(
-        url_for("index")
-    )
+    flash("You have been logged out.", "success")
+    return redirect(url_for("index"))
 
 
 # ============================================================

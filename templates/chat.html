@@ -71,7 +71,7 @@ Start the conversation.
 <form
 method="POST"
 class="message-form">
-
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <input
 name="message"
 placeholder="Type a message..."

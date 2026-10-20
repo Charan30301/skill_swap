@@ -79,12 +79,10 @@
         </a>
 
 
-        <a href="{{ url_for('logout') }}"
-           class="logout">
-
-            Logout
-
-        </a>
+        <form method="POST" action="{{ url_for('logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="logout">Logout</button>
+</form>
 
 
         {% else %}
