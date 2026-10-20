@@ -118,11 +118,10 @@ def get_db():
 
     return db
 
-
 def init_database():
 
     db = get_db()
-
+    
     db.executescript("""
 
     CREATE TABLE IF NOT EXISTS users (
@@ -136,7 +135,7 @@ def init_database():
         password TEXT NOT NULL,
 
         role TEXT NOT NULL DEFAULT 'user',
-
+        credits INTEGER NOT NULL DEFAULT 0 CHECK (credits >= 0),
         bio TEXT DEFAULT '',
 
         skills TEXT DEFAULT '',
@@ -240,10 +239,39 @@ def init_database():
         ON DELETE SET NULL
 
     );
-
+    CREATE TABLE IF NOT EXISTS credit_transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+    CREATE TABLE IF NOT EXISTS learning_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    teacher_id INTEGER NOT NULL,
+    learner_id INTEGER NOT NULL,
+    skill TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'requested'
+        CHECK (status IN ('requested', 'accepted', 'completed', 'cancelled')),
+    teacher_confirmed INTEGER NOT NULL DEFAULT 0,
+    learner_confirmed INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (learner_id) REFERENCES users(id) ON DELETE CASCADE,
+    CHECK (teacher_id != learner_id)
+); 
     """)
 
+    user_columns = {
+        row["name"]
+        for row in db.execute("PRAGMA table_info(users)").fetchall()
+    }
 
+    if "credits" not in user_columns:
+        db.execute(
+            "ALTER TABLE users ADD COLUMN credits INTEGER NOT NULL DEFAULT 0"
+        )
     # Create default admin account
 
     admin = db.execute(
@@ -487,31 +515,31 @@ def register():
             )
 
 
-        db.execute(
+        new_user = db.execute(
             """
             INSERT INTO users
-            (
-                name,
-                email,
-                password,
-                role,
-                bio,
-                skills
-            )
-
-            VALUES (?, ?, ?, ?, ?, ?)
+                (name, email, password, role, credits, bio, skills)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-
             (
                 name,
                 email,
                 generate_password_hash(password),
                 "user",
+                3,
                 bio,
                 skills
             )
         )
 
+        db.execute(
+            """
+            INSERT INTO credit_transactions (user_id, amount, reason)
+            VALUES (?, ?, ?)
+            """,
+            (new_user.lastrowid, 3, "Welcome bonus")
+        )
+        
 
         db.commit()
 
@@ -586,6 +614,7 @@ def login():
 
             session["role"] = user["role"]
 
+            session["credits"] = user["credits"]
 
             flash(
                 "Login successful!",
@@ -1164,7 +1193,91 @@ def profile(user_id):
         videos=videos
     )
 
+@app.route("/lesson/request/<int:teacher_id>", methods=["POST"])
+def request_lesson(teacher_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
 
+    learner_id = session["user_id"]
+    skill = request.form.get("skill", "").strip()
+
+    if teacher_id == learner_id:
+        flash("You cannot request a lesson from yourself.", "error")
+        return redirect(url_for("home"))
+
+    if not skill:
+        flash("Please choose a skill to learn.", "error")
+        return redirect(url_for("profile", user_id=teacher_id))
+
+    db = get_db()
+
+    try:
+        # Lock the SQLite write transaction so two requests can't spend
+        # the same last credit at the same time.
+        db.execute("BEGIN IMMEDIATE")
+
+        teacher = db.execute(
+            "SELECT id, skills FROM users WHERE id = ? AND role = 'user'",
+            (teacher_id,)
+        ).fetchone()
+
+        if teacher is None:
+            db.rollback()
+            flash("Teacher not found.", "error")
+            return redirect(url_for("home"))
+
+        offered_skills = {
+            item.strip().casefold()
+            for item in (teacher["skills"] or "").split(",")
+            if item.strip()
+        }
+
+        if skill.casefold() not in offered_skills:
+            db.rollback()
+            flash("That user has not listed this skill.", "error")
+            return redirect(url_for("profile", user_id=teacher_id))
+
+        debit = db.execute(
+            """
+            UPDATE users
+            SET credits = credits - 1
+            WHERE id = ? AND credits >= 1
+            """,
+            (learner_id,)
+        )
+
+        if debit.rowcount != 1:
+            db.rollback()
+            flash("You need at least 1 credit to request a lesson.", "error")
+            return redirect(url_for("profile", user_id=teacher_id))
+
+        lesson = db.execute(
+            """
+            INSERT INTO learning_sessions (teacher_id, learner_id, skill)
+            VALUES (?, ?, ?)
+            """,
+            (teacher_id, learner_id, skill)
+        )
+
+        db.execute(
+            """
+            INSERT INTO credit_transactions (user_id, amount, reason)
+            VALUES (?, ?, ?)
+            """,
+            (learner_id, -1, f"Lesson request: {skill}")
+        )
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        db.close()
+
+    flash("Lesson requested. 1 credit was reserved.", "success")
+    return redirect(url_for("profile", user_id=teacher_id))
 # ============================================================
 # CHAT
 # ============================================================

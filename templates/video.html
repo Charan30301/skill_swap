@@ -70,7 +70,7 @@ Comments
 <form
 method="POST"
 class="comment-form">
-
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 <textarea
 name="comment"
 placeholder="Write a comment..."

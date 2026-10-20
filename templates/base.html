@@ -56,7 +56,9 @@
         <a href="{{ url_for('upload') }}">
             Upload Video
         </a>
-
+        <span class="credits-badge">
+    Credits: {{ session.get('credits', 0) }}
+</span>
 
         {% if session.get('role') == 'admin' %}
 
